@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        terraform "terraform"
-    }
+        terraform 'terraform'
+}
     environment {
         PATH=sh(script:"echo $PATH:/usr/local/bin", returnStdout:true).trim()
         AWS_REGION = "us-east-1"
@@ -14,7 +14,6 @@ pipeline {
         HOME_FOLDER = "/home/ec2-user"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
     }
-
     stages {
         stage('Create ECR Repo') {
             steps {
@@ -29,19 +28,19 @@ pipeline {
             }
         }
 
-        stage("Build App Docker Image")
+        stage('Build App Docker Image') {
             steps {
-                echo "Build App Image"
-                sh "docker build --force-rm -t '$ECR_REGISTRY/$APP_REPO_NAME:latest'"
-                sh "docker image ls"
+                echo 'Building App Image'
+                sh 'docker build --force-rm -t "$ECR_REGISTRY/$APP_REPO_NAME:latest" .'
+                sh 'docker image ls'
             }
         }
 
-        stage("Push Image to ECR Repo") {
+        stage('Push Image to ECR Repo') {
             steps {
-                echo "Pushing App Image to ECR Repo"
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin '$ECR_REGISTRY'"
-                sh "docker push '$ECR_REGISTRY/$APP_REPO_NAME:latest'"
+                echo 'Pushing App Image to ECR Repo'
+                sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin "$ECR_REGISTRY"'
+                sh 'docker push "$ECR_REGISTRY/$APP_REPO_NAME:latest"'
             }
         }
 
@@ -73,15 +72,15 @@ pipeline {
                 script {
                 while(true) {
 
-                try {
-                    sh "curl -s --connect-timeout 60 ${MASTER_INSTANCE_PUBLIC_IP}:8080"
-                    echo "Successfully connected to Viz App."
-                    break
+                    try {
+                        sh "curl -s --connect-timeout 60 ${MASTER_INSTANCE_PUBLIC_IP}:8080"
+                        echo "Successfully connected to Viz App."
+                        break
                     }
-                catch(Exception) {
-                    echo 'Could not connect Viz App'
-                    sleep(5)
-                }
+                    catch(Exception) {
+                        echo 'Could not connect Viz App'
+                        sleep(5)
+                    }
                 }
                 }
             }
@@ -136,18 +135,4 @@ pipeline {
                 sh 'terraform destroy --auto-approve'
         }
     }
-
-
-
-
-// stageler:
-// - Create ECR Repo
-// - Build App Docker Image
-// - Push Image to ECR Repo
-// - Create Infrastructure for the App
-// - Test the Infrastructure
-// - Deploy App on Docker Swarm
-// - Destroy the infrastructure
-// * post 
-
-
+}
