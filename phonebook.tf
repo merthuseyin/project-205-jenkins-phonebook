@@ -159,7 +159,7 @@ resource "aws_iam_role" "ec2fulltoecr" {
       ]
     })
   }
-      managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"]
+  managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"]
 }
 
 resource "aws_instance" "docker-machine-leader-manager" {
@@ -214,7 +214,6 @@ resource "aws_instance" "docker-machine-workers" {
   depends_on = [aws_instance.docker-machine-leader-manager]
 }
 
-
 variable "sg-ports" {
   default = [80, 22, 2377, 7946, 8080]
 }
@@ -251,7 +250,6 @@ resource "aws_security_group" "tf-docker-sec-gr" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 output "leader-manager-public-ip" {
   value = aws_instance.docker-machine-leader-manager.public_ip 
